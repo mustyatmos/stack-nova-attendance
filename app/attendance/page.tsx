@@ -9,14 +9,12 @@ import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
 
 export default function AttendancePage() {
   const webcamRef = useRef<Webcam>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const startAI = async () => {
       await loadModels();
 
 
-      setLoading(false);
     };
 
     startAI();
