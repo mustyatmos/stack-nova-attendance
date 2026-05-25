@@ -1,5 +1,5 @@
 "use client";
-const [time, setTime] = useState("");
+
 import { useEffect, useState } from "react";
 import { db } from "../../lib/firebase";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
