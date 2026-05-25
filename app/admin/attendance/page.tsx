@@ -4,33 +4,39 @@ import { useEffect, useState } from "react";
 import { db } from "../../lib/firebase";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 
-export default function AttendanceLogsPage() {
+type AttendanceRecord = {
+  name?: string;
+  status?: string;
+  date?: string;
+  time?: string;
+};
 
-  const [logs, setLogs] = useState<any[]>([]);
+export default function AttendanceLogsPage() {
+  const [logs, setLogs] = useState<AttendanceRecord[]>([]);
 
   useEffect(() => {
-
     const fetchAttendance = async () => {
+      try {
+        const q = query(
+          collection(db, "attendance"),
+          orderBy("createdAt", "desc")
+        );
 
-      const q = query(
-        collection(db, "attendance"),
-        orderBy("createdAt", "desc")
-      );
+        const snapshot = await getDocs(q);
 
-      const snapshot = await getDocs(q);
+        const attendanceData: AttendanceRecord[] = [];
 
-      const attendanceData: any[] = [];
+        snapshot.forEach((doc) => {
+          attendanceData.push(doc.data() as AttendanceRecord);
+        });
 
-      snapshot.forEach((doc) => {
-        attendanceData.push(doc.data());
-      });
-
-      setLogs(attendanceData);
-
+        setLogs(attendanceData);
+      } catch (error) {
+        console.error(error);
+      }
     };
 
-    fetchAttendance();
-
+    void fetchAttendance();
   }, []);
 
   return (

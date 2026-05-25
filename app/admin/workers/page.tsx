@@ -4,23 +4,32 @@ import { useEffect, useState } from "react";
 import { db } from "../../lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 
+type WorkerRecord = {
+  name?: string;
+  employeeId?: string;
+};
+
 export default function WorkersPage() {
-  const [workers, setWorkers] = useState<any[]>([]);
+  const [workers, setWorkers] = useState<WorkerRecord[]>([]);
 
   useEffect(() => {
     const fetchWorkers = async () => {
-      const snapshot = await getDocs(collection(db, "workers"));
+      try {
+        const snapshot = await getDocs(collection(db, "workers"));
 
-      const workersData: any[] = [];
+        const workersData: WorkerRecord[] = [];
 
-      snapshot.forEach((doc) => {
-        workersData.push(doc.data());
-      });
+        snapshot.forEach((doc) => {
+          workersData.push(doc.data() as WorkerRecord);
+        });
 
-      setWorkers(workersData);
+        setWorkers(workersData);
+      } catch (error) {
+        console.error(error);
+      }
     };
 
-    fetchWorkers();
+    void fetchWorkers();
   }, []);
 
   return (

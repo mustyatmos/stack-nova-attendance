@@ -7,17 +7,51 @@ import { loadModels } from "../lib/faceapi";
 import { db } from "../lib/firebase";
 import { collection, getDocs, addDoc, query, where } from "firebase/firestore";
 
+type WorkerRecord = {
+  name: string;
+  faceDescriptor: number[];
+};
+
+const isValidWorkerRecord = (record: unknown): record is WorkerRecord => {
+  if (!record || typeof record !== "object") {
+    return false;
+  }
+
+  const worker = record as Partial<WorkerRecord>;
+
+  return (
+    typeof worker.name === "string" &&
+    Array.isArray(worker.faceDescriptor) &&
+    worker.faceDescriptor.every(
+      (value) => typeof value === "number" && Number.isFinite(value)
+    )
+  );
+};
+
 export default function AttendancePage() {
   const webcamRef = useRef<Webcam>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const startAI = async () => {
-      await loadModels();
-
-
+      try {
+        await loadModels();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     };
 
-    startAI();
+    void startAI();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const scanFace = async () => {
@@ -43,10 +77,14 @@ export default function AttendancePage() {
 
       const snapshot = await getDocs(collection(db, "workers"));
 
-      const workers: any[] = [];
+      const workers: WorkerRecord[] = [];
 
       snapshot.forEach((doc) => {
-        workers.push(doc.data());
+        const workerData = doc.data();
+
+        if (isValidWorkerRecord(workerData)) {
+          workers.push(workerData);
+        }
       });
 
       if (workers.length === 0) {

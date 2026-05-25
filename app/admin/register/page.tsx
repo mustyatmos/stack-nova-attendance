@@ -17,11 +17,16 @@ export default function RegisterWorkerPage() {
 
   useEffect(() => {
     const startAI = async () => {
-      await loadModels();
-      setModelsLoaded(true);
+      try {
+        await loadModels();
+        setModelsLoaded(true);
+      } catch (error) {
+        console.error(error);
+        setModelsLoaded(false);
+      }
     };
 
-    startAI();
+    void startAI();
   }, []);
 
   const registerWorker = async () => {
@@ -30,37 +35,47 @@ export default function RegisterWorkerPage() {
       return;
     }
 
-    const screenshot = webcamRef.current?.getScreenshot();
-
-    if (!screenshot) {
-      alert("No image captured");
+    if (!modelsLoaded) {
+      alert("AI models are still loading. Please try again in a moment.");
       return;
     }
 
-    const img = await faceapi.fetchImage(screenshot);
+    try {
+      const screenshot = webcamRef.current?.getScreenshot();
 
-    const detection = await faceapi
-      .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
-      .withFaceLandmarks()
-      .withFaceDescriptor();
+      if (!screenshot) {
+        alert("No image captured");
+        return;
+      }
 
-    if (!detection) {
-      alert("No face detected. Try again with better lighting.");
-      return;
+      const img = await faceapi.fetchImage(screenshot);
+
+      const detection = await faceapi
+        .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+
+      if (!detection) {
+        alert("No face detected. Try again with better lighting.");
+        return;
+      }
+
+      const workerData = {
+        name,
+        employeeId,
+        faceDescriptor: Array.from(detection.descriptor),
+      };
+
+      await addDoc(collection(db, "workers"), {
+        ...workerData,
+        createdAt: new Date().toISOString(),
+      });
+
+      alert("Worker Saved to Firebase Successfully");
+    } catch (error) {
+      console.error(error);
+      alert("Worker registration failed. Please try again.");
     }
-
-    const workerData = {
-      name,
-      employeeId,
-      faceDescriptor: Array.from(detection.descriptor),
-    };
-
-   await addDoc(collection(db, "workers"), {
-  ...workerData,
-  createdAt: new Date().toISOString(),
-});
-
-alert("Worker Saved to Firebase Successfully");
   };
 
   return (

@@ -7,28 +7,24 @@ import { collection, getDocs } from "firebase/firestore";
 
 export default function AdminDashboard() {
   const [workerCount, setWorkerCount] = useState(0);
-const [attendanceCount, setAttendanceCount] = useState(0);
+  const [attendanceCount, setAttendanceCount] = useState(0);
 
-useEffect(() => {
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const workersSnapshot = await getDocs(collection(db, "workers"));
+        const attendanceSnapshot = await getDocs(collection(db, "attendance"));
 
-  const fetchStats = async () => {
+        setWorkerCount(workersSnapshot.size);
+        setAttendanceCount(attendanceSnapshot.size);
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
-    const workersSnapshot = await getDocs(
-      collection(db, "workers")
-    );
+    void fetchStats();
+  }, []);
 
-    const attendanceSnapshot = await getDocs(
-      collection(db, "attendance")
-    );
-
-    setWorkerCount(workersSnapshot.size);
-    setAttendanceCount(attendanceSnapshot.size);
-
-  };
-
-  fetchStats();
-
-}, []);
   return (
     <main className="min-h-screen bg-gray-100 p-10">
 
