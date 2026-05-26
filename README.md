@@ -52,7 +52,7 @@ Check out the live demo:
 
 **Mustapha Adamu Atmos**
 
-[GitHub](https://github.com/mustyatmos) | [LinkedIn](https://www.linkedin.com/in/your-linkedin/) | [Twitter](https://twitter.com/your-twitter/)
+[GitHub](https://github.com/mustyatmos) | [LinkedIn](https://www.linkedin.com/in/your-linkedin/) | [Twitter](https://twitter.com/your-twitter/) | [Instagram](https://www.instagram.com/musty_atmos?igsh=dGh4Ynh1OXphODFm) | [Threads](https://www.threads.net/@musty_atmos)
 
 ---
 
